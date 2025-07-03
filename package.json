@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "@nozbe/watermelondb": "^0.28.0",
+    "@nozbe/with-observables": "^1.6.0",
+    "@reduxjs/toolkit": "^2.8.2",
+    "expo": "^53.0.16",
+    "expo-av": "~15.1.7",
+    "expo-haptics": "~14.1.4",
+    "expo-linear-gradient": "~14.1.5",
+    "expo-sqlite": "^15.2.13",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-redux": "^9.2.0"
+  }
+}

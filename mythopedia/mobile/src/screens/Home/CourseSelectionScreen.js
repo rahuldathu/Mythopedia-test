@@ -1,16 +1,128 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, Alert, Button } from 'react-native';
+import CourseCard from '../../components/CourseCard';
+import { fetchCourses } from '../../services/courseService';
+import { useDispatch, useSelector } from 'react-redux';
+import { setDownloadedCourses } from '../../store/offlineSlice';
+import { saveCourse, saveLessons, getOfflineCourses } from '../../database/wmUtils';
+import { fetchLessons } from '../../services/lessonService';
+import NetInfo from '@react-native-community/netinfo';
+import { logCourseView, logDownloadForOffline } from '../../services/analyticsService';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Animated } from 'react-native';
 
-export default function CourseSelectionScreen() {
+export default function CourseSelectionScreen({ navigation }) {
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const dispatch = useDispatch();
+  const downloadedCourses = useSelector(state => state.offline.downloadedCourses);
+  const [isOffline, setIsOffline] = useState(false);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(state => {
+      setIsOffline(!state.isConnected);
+    });
+    loadCourses();
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (courses.length > 0) {
+      courses.forEach(course => logCourseView(course.id, course.name));
+    }
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 800,
+      useNativeDriver: true,
+    }).start();
+  }, [courses]);
+
+  const loadCourses = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      if (isOffline) {
+        const offlineCourses = await getOfflineCourses();
+        setCourses(offlineCourses);
+      } else {
+        const data = await fetchCourses();
+        setCourses(data);
+      }
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSelectCourse = (course) => {
+    logCourseView(course.id, course.name);
+    navigation.navigate('LessonList', { courseId: course.id });
+  };
+
+  const handleDownloadCourse = async (course) => {
+    try {
+      const lessons = await fetchLessons(course.id);
+      await saveCourse(course);
+      await saveLessons(lessons);
+      const offlineCourses = await getOfflineCourses();
+      dispatch(setDownloadedCourses(offlineCourses.map(c => c.id)));
+      await logDownloadForOffline(course.id);
+      Alert.alert('Downloaded', 'Course and lessons cached for offline use.');
+    } catch (e) {
+      Alert.alert('Error', e.message);
+    }
+  };
+
+  if (loading) {
+    return <ActivityIndicator style={{ flex: 1 }} size="large" />;
+  }
+
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.error}>{error}</Text>
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Select a Mythology Course</Text>
-      {/* TODO: List available courses here */}
-    </View>
+    <LinearGradient
+      colors={['#2b1055', '#7597de', '#fbc531']}
+      style={styles.gradient}
+    >
+      <View style={styles.container}>
+        <Text style={styles.title}>Select a Mythology Course</Text>
+        <FlatList
+          data={courses}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item, index }) => (
+            <Animated.View style={{
+              opacity: fadeAnim,
+              transform: [{ translateY: fadeAnim.interpolate({ inputRange: [0, 1], outputRange: [40, 0] }) }],
+            }}>
+              <View>
+                <CourseCard course={item} onPress={handleSelectCourse} />
+                {downloadedCourses.includes(item.id) ? (
+                  <Text style={{ color: 'green', textAlign: 'center' }}>Downloaded</Text>
+                ) : (
+                  <Button title="Download for Offline" onPress={() => handleDownloadCourse(item)} />
+                )}
+              </View>
+            </Animated.View>
+          )}
+          contentContainerStyle={{ paddingBottom: 32 }}
+        />
+      </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 16 },
+  gradient: { flex: 1 },
+  container: { flex: 1, backgroundColor: 'transparent' },
+  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 16, textAlign: 'center', marginTop: 24 },
+  error: { color: 'red', textAlign: 'center', marginTop: 32 },
 }); 

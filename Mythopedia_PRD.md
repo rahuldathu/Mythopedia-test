@@ -81,7 +81,7 @@ Modules and tasks:
 ### Backend (API Server)
 
 Framework: Node.js (Express)  
-Database: PostgreSQL via Prisma ORM  
+Database: Supabase (PostgreSQL + Supabase Auth)
 Asset Storage: AWS S3  
 Notifications: Firebase Cloud Messaging (FCM)
 

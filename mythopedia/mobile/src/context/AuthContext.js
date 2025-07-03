@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { supabase } from '../services/supabaseClient';
+import { logLogin } from '../services/analyticsService';
 
 const AuthContext = createContext();
 
@@ -32,6 +33,7 @@ export function AuthProvider({ children }) {
     if (error) throw error;
     setUser(data.user);
     await SecureStore.setItemAsync('sb_token', data.session.access_token);
+    await logLogin('email');
     return data;
   };
 
@@ -40,6 +42,7 @@ export function AuthProvider({ children }) {
     if (error) throw error;
     setUser(data.user);
     await SecureStore.setItemAsync('sb_token', data.session.access_token);
+    await logLogin('register');
     return data;
   };
 

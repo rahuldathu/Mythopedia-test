@@ -1,8 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Button } from 'react-native';
+import { logLessonComplete, logXPChange } from '../../services/analyticsService';
 
 export default function LessonResultScreen({ route, navigation }) {
-  const { xp } = route.params;
+  const { xp, lessonId } = route.params;
+  useEffect(() => {
+    if (lessonId) logLessonComplete(lessonId, xp);
+    if (xp) logXPChange(xp, 'lesson_complete');
+  }, [lessonId, xp]);
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Lesson Complete!</Text>
