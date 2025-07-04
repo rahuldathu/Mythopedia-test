@@ -3,16 +3,57 @@ import { NavigationContainer } from '@react-navigation/native';
 import { Provider } from 'react-redux';
 import store from './src/store';
 import AppNavigator from './src/navigation/AppNavigator';
-import { AuthProvider } from './src/context/AuthContext';
+import { AuthProvider, useAuth } from './src/context/AuthContext';
 import NetInfo from '@react-native-community/netinfo';
 import { useDispatch, useSelector } from 'react-redux';
 import { setSyncStatus } from './src/store/offlineSlice';
 import { syncUserProgressToBackend, syncCoursesAndLessonsFromBackend } from './src/services/syncService';
 import { useEffect } from 'react';
+import { NotificationProvider, useNotification } from './src/context/NotificationContext';
+import InAppNotification from './src/components/InAppNotification';
+import * as Sentry from 'sentry-expo';
+import * as Linking from 'expo-linking';
+import Constants from 'expo-constants';
+import { View, Text, Button } from 'react-native';
 
-export default function App() {
+Sentry.init({
+  dsn: 'YOUR_SENTRY_DSN', // TODO: Replace with your actual DSN from Sentry project settings
+  enableInExpoDevelopment: true,
+  debug: false,
+});
+
+const linking = {
+  prefixes: ['mobile://', 'https://mythopedia.app'],
+  config: {
+    screens: {
+      Course: 'course/:id',
+      Lesson: 'lesson/:lessonId',
+      // Add other screens as needed
+    },
+  },
+};
+
+function ErrorBoundary({ children }) {
+  return (
+    <Sentry.ErrorBoundary
+      fallback={({ error, resetError }) => (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 }}>
+          <Text style={{ fontSize: 18, color: 'red', marginBottom: 12 }}>Something went wrong.</Text>
+          <Text style={{ marginBottom: 16 }}>{error.toString()}</Text>
+          <Button title="Try Again" onPress={resetError} />
+        </View>
+      )}
+      showDialog
+    >
+      {children}
+    </Sentry.ErrorBoundary>
+  );
+}
+
+function AppContent() {
   const dispatch = useDispatch();
   const user = useSelector(state => state.user.user);
+  const { notification } = useNotification();
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(async (state) => {
@@ -30,13 +71,39 @@ export default function App() {
     return () => unsubscribe();
   }, [user]);
 
+  React.useEffect(() => {
+    if (user) {
+      Sentry.Native.setUser({ id: user.id, email: user.email, username: user.username });
+    } else {
+      Sentry.Native.setUser(null);
+    }
+    Sentry.Native.setRelease(Constants.manifest.version);
+  }, [user]);
+
+  return (
+    <>
+      <InAppNotification
+        message={notification?.message}
+        type={notification?.type}
+        visible={!!notification}
+      />
+      <NavigationContainer linking={linking}>
+        <AppNavigator />
+      </NavigationContainer>
+    </>
+  );
+}
+
+export default function App() {
   return (
     <Provider store={store}>
-      <AuthProvider>
-        <NavigationContainer>
-          <AppNavigator />
-        </NavigationContainer>
-      </AuthProvider>
+      <ErrorBoundary>
+        <NotificationProvider>
+          <AuthProvider>
+            <AppContent />
+          </AuthProvider>
+        </NotificationProvider>
+      </ErrorBoundary>
     </Provider>
   );
 } 

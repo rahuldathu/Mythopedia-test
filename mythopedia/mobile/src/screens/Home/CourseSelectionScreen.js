@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, Alert, Button } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, Alert, Button, Share, ToastAndroid, Platform } from 'react-native';
 import CourseCard from '../../components/CourseCard';
 import { fetchCourses } from '../../services/courseService';
 import { useDispatch, useSelector } from 'react-redux';
@@ -7,9 +7,13 @@ import { setDownloadedCourses } from '../../store/offlineSlice';
 import { saveCourse, saveLessons, getOfflineCourses } from '../../database/wmUtils';
 import { fetchLessons } from '../../services/lessonService';
 import NetInfo from '@react-native-community/netinfo';
-import { logCourseView, logDownloadForOffline } from '../../services/analyticsService';
+import { logCourseView, logDownloadForOffline, logShare } from '../../services/analyticsService';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Animated } from 'react-native';
+import XPProgressBar from '../../components/XPProgressBar';
+import * as Linking from 'expo-linking';
+import * as Clipboard from 'expo-clipboard';
+import * as Haptics from 'expo-haptics';
 
 export default function CourseSelectionScreen({ navigation }) {
   const [courses, setCourses] = useState([]);
@@ -19,6 +23,7 @@ export default function CourseSelectionScreen({ navigation }) {
   const downloadedCourses = useSelector(state => state.offline.downloadedCourses);
   const [isOffline, setIsOffline] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const xp = useSelector(state => state.progress.xp);
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
@@ -76,6 +81,19 @@ export default function CourseSelectionScreen({ navigation }) {
     }
   };
 
+  const handleShareCourse = async (course) => {
+    const url = Linking.createURL(`/course/${course.id}`);
+    await Clipboard.setStringAsync(url);
+    await logShare('share', course.id, 'course');
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    if (Platform.OS === 'android') {
+      ToastAndroid.show('Link copied to clipboard!', ToastAndroid.SHORT);
+    } else {
+      Alert.alert('Copied', 'Link copied to clipboard!');
+    }
+    await Share.share({ message: `Check out this course on Mythopedia! ${url}` });
+  };
+
   if (loading) {
     return <ActivityIndicator style={{ flex: 1 }} size="large" />;
   }
@@ -94,6 +112,7 @@ export default function CourseSelectionScreen({ navigation }) {
       style={styles.gradient}
     >
       <View style={styles.container}>
+        <XPProgressBar xp={xp} xpToNextLevel={100} level={1} />
         <Text style={styles.title}>Select a Mythology Course</Text>
         <FlatList
           data={courses}
@@ -110,6 +129,7 @@ export default function CourseSelectionScreen({ navigation }) {
                 ) : (
                   <Button title="Download for Offline" onPress={() => handleDownloadCourse(item)} />
                 )}
+                <Button title="Share" onPress={() => handleShareCourse(item)} />
               </View>
             </Animated.View>
           )}

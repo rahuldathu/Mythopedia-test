@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Button, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, Button, ActivityIndicator, Alert, Share, ToastAndroid, Platform } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../services/supabaseClient';
 import NetInfo from '@react-native-community/netinfo';
@@ -8,6 +8,10 @@ import QuizLesson from './types/QuizLesson';
 import MatchLesson from './types/MatchLesson';
 import FillInLesson from './types/FillInLesson';
 import ImageMatchLesson from './types/ImageMatchLesson';
+import * as Linking from 'expo-linking';
+import * as Clipboard from 'expo-clipboard';
+import * as Haptics from 'expo-haptics';
+import { logShare } from '../../services/analyticsService';
 
 export default function LessonScreen({ route, navigation }) {
   const { user } = useAuth();
@@ -56,6 +60,19 @@ export default function LessonScreen({ route, navigation }) {
     navigation.replace('LessonResult', { xp: isCorrect ? 10 : 5 });
   };
 
+  const handleShareLesson = async () => {
+    const url = Linking.createURL(`/lesson/${lessonId}`);
+    await Clipboard.setStringAsync(url);
+    await logShare('share', lessonId, 'lesson');
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    if (Platform.OS === 'android') {
+      ToastAndroid.show('Link copied to clipboard!', ToastAndroid.SHORT);
+    } else {
+      Alert.alert('Copied', 'Link copied to clipboard!');
+    }
+    await Share.share({ message: `Check out this lesson on Mythopedia! ${url}` });
+  };
+
   if (loading) {
     return <ActivityIndicator style={{ flex: 1 }} size="large" />;
   }
@@ -94,6 +111,7 @@ export default function LessonScreen({ route, navigation }) {
     <View style={styles.container}>
       <Text style={styles.title}>Lesson</Text>
       {content}
+      <Button title="Share Lesson" onPress={handleShareLesson} />
     </View>
   );
 }

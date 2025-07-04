@@ -40,4 +40,72 @@ export async function sendPushTokenToBackend(token, userId) {
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${userId}` }, // Replace with real JWT
     body: JSON.stringify({ token }),
   });
+}
+
+export async function sendTestPushNotification(token, message) {
+  await fetch('https://exp.host/--/api/v2/push/send', {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Accept-encoding': 'gzip, deflate',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      to: token,
+      sound: 'default',
+      title: 'Mythopedia',
+      body: message,
+      data: { message },
+    }),
+  });
+}
+
+// --- Local Notification Scheduling ---
+
+/**
+ * Schedule daily local notifications to remind the user to complete a lesson.
+ * Schedules notifications for the next N days at a specified hour/minute.
+ * @param {number} days Number of days to schedule (default: 7)
+ * @param {number} hour Hour of day (24h) to send notification (default: 10)
+ * @param {number} minute Minute of hour to send notification (default: 0)
+ */
+export async function scheduleDailyLessonReminders(days = 7, hour = 10, minute = 0) {
+  // First, clear any existing scheduled notifications
+  await clearScheduledLessonReminders();
+  const identifiers = [];
+  for (let i = 1; i <= days; i++) {
+    const trigger = new Date();
+    trigger.setDate(trigger.getDate() + i);
+    trigger.setHours(hour);
+    trigger.setMinutes(minute);
+    trigger.setSeconds(0);
+    trigger.setMilliseconds(0);
+    const id = await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Mythopedia',
+        body: "Don't forget to complete a lesson today!",
+        sound: true,
+        priority: Notifications.AndroidNotificationPriority.HIGH,
+        data: { type: 'lesson_reminder' },
+      },
+      trigger,
+    });
+    identifiers.push(id);
+  }
+  // Optionally, store identifiers in AsyncStorage if you want to cancel later
+  return identifiers;
+}
+
+/**
+ * Cancel all scheduled lesson reminder notifications.
+ */
+export async function clearScheduledLessonReminders() {
+  await Notifications.cancelAllScheduledNotificationsAsync();
+}
+
+/**
+ * List all scheduled notifications (for debugging or management)
+ */
+export async function getScheduledNotifications() {
+  return await Notifications.getAllScheduledNotificationsAsync();
 } 

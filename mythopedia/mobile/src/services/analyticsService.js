@@ -26,4 +26,16 @@ export async function logAchievementUnlock(achievementId, name) {
 
 export async function logDownloadForOffline(courseId) {
   await Analytics.logEvent('download_for_offline', { courseId });
+}
+
+export async function logFeedbackSubmit(type) {
+  await Analytics.logEvent('feedback_submit', { type });
+}
+
+export async function logShare(action, id, entityType) {
+  await Analytics.logEvent('share', { action, id, entityType });
+}
+
+export async function logDeepLinkOpen(entityType, id) {
+  await Analytics.logEvent('deep_link_open', { entityType, id });
 } 

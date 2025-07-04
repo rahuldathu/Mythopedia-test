@@ -2,7 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import CourseSelectionScreen from '../screens/Home/CourseSelectionScreen';
 import LeaderboardScreen from '../screens/Leaderboard/LeaderboardScreen';
-import AchievementsScreen from '../screens/Achievements/AchievementsScreen';
+import AchievementsScreen from '../screens/Profile/AchievementsScreen';
 import ProfileScreen from '../screens/Profile/ProfileScreen';
 
 const Tab = createBottomTabNavigator();

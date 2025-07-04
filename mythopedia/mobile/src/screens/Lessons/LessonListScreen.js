@@ -8,6 +8,13 @@ import { saveLesson, getLesson } from '../../services/storageService';
 import { getOfflineLessons } from '../../database/wmUtils';
 import { logLessonView } from '../../services/analyticsService';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useDispatch, useSelector } from 'react-redux';
+import { awardXP } from '../../services/xpService';
+import XPToast from '../../components/XPToast';
+import * as Haptics from 'expo-haptics';
+import { setAchievements, setLessonProgress, setXP, setStreak, setLoading, setError } from '../../store/progressSlice';
+import { checkAndUnlockAchievements } from '../../services/achievementService';
+import { useNotification } from '../../context/NotificationContext';
 
 export default function LessonListScreen({ route, navigation }) {
   const { user } = useAuth();
@@ -18,6 +25,14 @@ export default function LessonListScreen({ route, navigation }) {
   const courseId = route?.params?.courseId;
   const [isOffline, setIsOffline] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const dispatch = useDispatch();
+  const currentXP = useSelector(state => state.progress.xp);
+  const [showToast, setShowToast] = useState(false);
+  const [toastAmount, setToastAmount] = useState(0);
+  const unlockedAchievements = useSelector(state => state.progress.achievements);
+  const [showAchievement, setShowAchievement] = useState(false);
+  const [achievement, setAchievement] = useState(null);
+  const { showNotification } = useNotification();
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
@@ -33,6 +48,33 @@ export default function LessonListScreen({ route, navigation }) {
       duration: 800,
       useNativeDriver: true,
     }).start();
+  }, [lessons]);
+
+  useEffect(() => {
+    // Check for course completion
+    if (lessons.length > 0 && lessons.every(l => l.status === 'completed')) {
+      // Persist completed courses in Redux
+      const completedCourses = useSelector(state => state.progress.completedCourses) || [];
+      if (!completedCourses.includes(courseId)) {
+        awardXP(50, dispatch, currentXP);
+        dispatch({ type: 'progress/setCompletedCourses', payload: [...completedCourses, courseId] });
+        setToastAmount(50);
+        setShowToast(true);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        showNotification('Course completed! +50 XP awarded.', 'success');
+        // Check and unlock achievements
+        const newlyUnlocked = checkAndUnlockAchievements(
+          { ...useSelector(state => state.progress) },
+          unlockedAchievements,
+          dispatch
+        );
+        if (newlyUnlocked.length > 0) {
+          setAchievement(newlyUnlocked[0]);
+          setShowAchievement(true);
+          showNotification(`${newlyUnlocked[0].name} Unlocked!`, 'success');
+        }
+      }
+    }
   }, [lessons]);
 
   const fetchLessons = async () => {
@@ -111,6 +153,10 @@ export default function LessonListScreen({ route, navigation }) {
       style={styles.gradient}
     >
       <View style={styles.container}>
+        <XPToast amount={toastAmount} visible={showToast} onHide={() => setShowToast(false)} />
+        {showAchievement && achievement && (
+          <XPToast amount={achievement.name + ' Unlocked!'} visible={showAchievement} onHide={() => setShowAchievement(false)} />
+        )}
         <FlatList
           data={lessons}
           keyExtractor={(item) => item.id}

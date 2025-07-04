@@ -2,12 +2,15 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { supabase } from '../services/supabaseClient';
 import { logLogin } from '../services/analyticsService';
+import { useDispatch } from 'react-redux';
+import { setXP } from '../store/progressSlice';
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     // Check for existing session on mount
@@ -43,6 +46,7 @@ export function AuthProvider({ children }) {
     setUser(data.user);
     await SecureStore.setItemAsync('sb_token', data.session.access_token);
     await logLogin('register');
+    dispatch(setXP(25));
     return data;
   };
 
