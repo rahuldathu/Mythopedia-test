@@ -15,6 +15,7 @@ import * as Sentry from 'sentry-expo';
 import * as Linking from 'expo-linking';
 import Constants from 'expo-constants';
 import { View, Text, Button } from 'react-native';
+import { initializeFirebaseAnalytics } from './src/config/firebase';
 
 Sentry.init({
   dsn: 'YOUR_SENTRY_DSN', // TODO: Replace with your actual DSN from Sentry project settings
@@ -54,6 +55,11 @@ function AppContent() {
   const dispatch = useDispatch();
   const user = useSelector(state => state.user.user);
   const { notification } = useNotification();
+
+  // Initialize Firebase Analytics
+  React.useEffect(() => {
+    initializeFirebaseAnalytics();
+  }, []);
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(async (state) => {
