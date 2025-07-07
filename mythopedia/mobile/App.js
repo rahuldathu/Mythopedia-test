@@ -11,20 +11,20 @@ import { syncUserProgressToBackend, syncCoursesAndLessonsFromBackend } from './s
 import { useEffect } from 'react';
 import { NotificationProvider, useNotification } from './src/context/NotificationContext';
 import InAppNotification from './src/components/InAppNotification';
-import * as Sentry from 'sentry-expo';
+import * as Sentry from '@sentry/react-native';
 import * as Linking from 'expo-linking';
 import Constants from 'expo-constants';
 import { View, Text, Button } from 'react-native';
 import { initializeFirebaseAnalytics } from './src/config/firebase';
 
 Sentry.init({
-  dsn: 'YOUR_SENTRY_DSN', // TODO: Replace with your actual DSN from Sentry project settings
-  enableInExpoDevelopment: true,
+  dsn: 'https://45364e59b89d7951b5761cca1c9ec7a4@o4509620013367296.ingest.de.sentry.io/4509620033486928', // TODO: Replace with your actual DSN from Sentry project settings
+  enabled: !__DEV__,
   debug: false,
 });
 
 const linking = {
-  prefixes: ['mobile://', 'https://mythopedia.app'],
+  prefixes: ['mythopedia://', 'https://mythopedia.app'],
   config: {
     screens: {
       Course: 'course/:id',
@@ -79,11 +79,11 @@ function AppContent() {
 
   React.useEffect(() => {
     if (user) {
-      Sentry.Native.setUser({ id: user.id, email: user.email, username: user.username });
+      Sentry.setUser({ id: user.id, email: user.email, username: user.username });
     } else {
-      Sentry.Native.setUser(null);
+      Sentry.setUser(null);
     }
-    Sentry.Native.setRelease(Constants.manifest.version);
+    Sentry.setRelease(Constants.manifest.version);
   }, [user]);
 
   return (
@@ -100,7 +100,7 @@ function AppContent() {
   );
 }
 
-export default function App() {
+export default Sentry.wrap(function App() {
   return (
     <Provider store={store}>
       <ErrorBoundary>
@@ -112,4 +112,4 @@ export default function App() {
       </ErrorBoundary>
     </Provider>
   );
-} 
+});

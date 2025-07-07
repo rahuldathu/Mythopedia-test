@@ -1,22 +1,24 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
+    "name": "Mythopedia",
+    "slug": "mythopedia",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "mobile",
+    "scheme": "mythopedia",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.mythopedia.app"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.mythopedia.app"
     },
     "web": {
       "bundler": "metro",
@@ -31,7 +33,27 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
+      ],
+      [
+        "@sentry/react-native/expo",
+        {
+          "organization": "mythopedia",
+          "project": "mythopedia"
+        }
       ]
-    ]
+    ],
+    "extra": {
+      "SUPABASE_URL": "https://zeexhpwbpjakvztvccsx.supabase.co",
+      "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InplZXhocHdicGpha3Z6dHZjY3N4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NzY3ODEsImV4cCI6MjA2NzA1Mjc4MX0.W9tI1xfzaaTzH5Ki_H00h6VhDDCHOrn3nnZz7QFbQkc",
+      "FCM_PROJECT_ID": "mythopedia-a4f75",
+      "FCM_API_KEY": "AIzaSyCBJcUU-QkRTvIqNqWmVx_IlAHF4Mn_6FA",
+      "FIREBASE_API_KEY": "AIzaSyCBJcUU-QkRTvIqNqWmVx_IlAHF4Mn_6FA",
+      "FIREBASE_AUTH_DOMAIN": "mythopedia-a4f75.firebaseapp.com",
+      "FIREBASE_PROJECT_ID": "mythopedia-a4f75",
+      "FIREBASE_STORAGE_BUCKET": "mythopedia-a4f75.firebasestorage.app",
+      "FIREBASE_MESSAGING_SENDER_ID": "527547280829",
+      "FIREBASE_APP_ID": "1:527547280829:web:d1388d346f97972723f6d4",
+      "FIREBASE_MEASUREMENT_ID": "G-R9T7JHHZ7P"
+    }
   }
 }

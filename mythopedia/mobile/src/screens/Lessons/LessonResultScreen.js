@@ -46,7 +46,7 @@ export default function LessonResultScreen({ route, navigation }) {
       <Text style={styles.title}>Lesson Complete!</Text>
       <Text style={styles.xp}>+{xp} XP</Text>
       <Button title="Back to Lessons" onPress={() => navigation.navigate('Lessons')} />
-      {/* TODO: Add continue to next lesson */}
+      <Button title="Continue to Next Lesson" onPress={() => navigation.navigate('Lesson', { lessonId: lessonId + 1 })} />
     </View>
   );
 }

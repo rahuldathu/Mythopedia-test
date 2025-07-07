@@ -1,0 +1,35 @@
+[33mcommit 382844b0703f993ef0cb903ea24d08fd94a3487f[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: rahuldathu <rahul@gmail.com>
+Date:   Sun Jul 6 11:02:35 2025 +0530
+
+    C5
+
+[33mcommit 2514488e99ceb1ca6ccf634407afc86f4fb96c4b[m
+Author: rahuldathu <rahul@gmail.com>
+Date:   Fri Jul 4 17:05:44 2025 +0530
+
+    C4
+
+[33mcommit a02a3c8844616d32f23863c763d2d1f2e76af6b4[m
+Author: rahuldathu <rahul@gmail.com>
+Date:   Fri Jul 4 00:54:39 2025 +0530
+
+    C3
+
+[33mcommit 67fa606dc74632ca71071fc15e95cbc46e416fb6[m
+Author: rahuldathu <rahul@gmail.com>
+Date:   Thu Jul 3 02:45:13 2025 +0530
+
+    C2
+
+[33mcommit 6393e95bd9862a61f8b2965592d241f670bd4cb3[m
+Author: rahuldathu <rahul@gmail.com>
+Date:   Thu Jul 3 02:29:18 2025 +0530
+
+    C1
+
+[33mcommit f7f640d656dd0b67ad0b24ac418c398736fe668e[m
+Author: rahuldathu <rahul@gmail.com>
+Date:   Thu Jul 3 02:21:40 2025 +0530
+
+    Initial commit: restored full Mythopedia frontend and backend codebase
