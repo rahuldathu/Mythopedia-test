@@ -5,7 +5,6 @@ import LessonCard from '../../components/LessonCard';
 import { supabase } from '../../services/supabaseClient';
 import NetInfo from '@react-native-community/netinfo';
 import { saveLesson, getLesson } from '../../services/storageService';
-import { getOfflineLessons } from '../../database/wmUtils';
 import { logLessonView } from '../../services/analyticsService';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useDispatch, useSelector } from 'react-redux';
@@ -15,6 +14,7 @@ import * as Haptics from 'expo-haptics';
 import { setAchievements, setLessonProgress, setXP, setStreak, setLoading, setError } from '../../store/progressSlice';
 import { checkAndUnlockAchievements } from '../../services/achievementService';
 import { useNotification } from '../../context/NotificationContext';
+import { getOfflineLessons } from '../../database/wmUtils';
 
 export default function LessonListScreen({ route, navigation }) {
   const { user } = useAuth();

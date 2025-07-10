@@ -1,49 +1,103 @@
-import database from './index';
+import db from './index';
 
-export async function saveCourse(course) {
-  await database.write(async () => {
-    await database.get('courses').create((c) => {
-      c._raw.id = course.id;
-      c.name = course.name;
-      c.mythologyType = course.mythology_type;
-      c.description = course.description;
+// Save a course to SQLite
+export function saveCourse(course) {
+  return new Promise((resolve, reject) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        'INSERT OR REPLACE INTO courses (id, title, description, updated_at) VALUES (?, ?, ?, ?)',
+        [course.id, course.title, course.description, course.updated_at],
+        (_, result) => resolve(result),
+        (_, error) => reject(error)
+      );
     });
   });
 }
 
-export async function saveLessons(lessons) {
-  await database.write(async () => {
-    for (const lesson of lessons) {
-      await database.get('lessons').create((l) => {
-        l._raw.id = lesson.id;
-        l.courseId = lesson.course_id;
-        l.title = lesson.title;
-        l.type = lesson.type;
-        l.content = lesson.content;
+// Save multiple lessons to SQLite
+export function saveLessons(lessons) {
+  return Promise.all(lessons.map(lesson =>
+    new Promise((resolve, reject) => {
+      db.transaction(tx => {
+        tx.executeSql(
+          'INSERT OR REPLACE INTO lessons (id, course_id, title, content, updated_at) VALUES (?, ?, ?, ?, ?)',
+          [lesson.id, lesson.course_id, lesson.title, lesson.content, lesson.updated_at],
+          (_, result) => resolve(result),
+          (_, error) => reject(error)
+        );
       });
-    }
+    })
+  ));
+}
+
+// Get all offline courses
+export function getOfflineCourses() {
+  return new Promise((resolve, reject) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        'SELECT * FROM courses',
+        [],
+        (_, { rows }) => resolve(rows._array),
+        (_, error) => reject(error)
+      );
+    });
   });
 }
 
-export async function getOfflineCourses() {
-  return await database.get('courses').query().fetch();
+// Get all offline lessons for a course
+export function getOfflineLessons(courseId) {
+  return new Promise((resolve, reject) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        'SELECT * FROM lessons WHERE course_id = ?',
+        [courseId],
+        (_, { rows }) => resolve(rows._array),
+        (_, error) => reject(error)
+      );
+    });
+  });
 }
 
-export async function getOfflineLessons(courseId) {
-  return await database.get('lessons').query().where('course_id', courseId).fetch();
+// Save user progress
+export function saveUserProgress(progress) {
+  return new Promise((resolve, reject) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        'INSERT OR REPLACE INTO progress (id, lesson_id, user_id, status, updated_at, synced) VALUES (?, ?, ?, ?, ?, 0)',
+        [progress.id, progress.lesson_id, progress.user_id, progress.status, progress.updated_at],
+        (_, result) => resolve(result),
+        (_, error) => reject(error)
+      );
+    });
+  });
 }
 
-export async function getUnsyncedUserProgress() {
-  return await database.get('user_progress').query().where('synced', false).fetch();
+// Get unsynced user progress (synced = 0)
+export function getUnsyncedUserProgress() {
+  return new Promise((resolve, reject) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        'SELECT * FROM progress WHERE synced = 0',
+        [],
+        (_, { rows }) => resolve(rows._array),
+        (_, error) => reject(error)
+      );
+    });
+  });
 }
 
-export async function markUserProgressAsSynced(ids) {
-  await database.write(async () => {
-    for (const id of ids) {
-      const record = await database.get('user_progress').find(id);
-      await record.update((r) => {
-        r.synced = true;
-      });
-    }
+// Mark user progress as synced (set synced = 1 for given IDs)
+export function markUserProgressAsSynced(ids) {
+  if (!ids.length) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    db.transaction(tx => {
+      const placeholders = ids.map(() => '?').join(',');
+      tx.executeSql(
+        `UPDATE progress SET synced = 1 WHERE id IN (${placeholders})`,
+        ids,
+        (_, result) => resolve(result),
+        (_, error) => reject(error)
+      );
+    });
   });
 } 

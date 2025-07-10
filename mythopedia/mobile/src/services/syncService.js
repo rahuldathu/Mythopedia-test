@@ -1,25 +1,32 @@
-import { getUnsyncedUserProgress, markUserProgressAsSynced, saveCourse, saveLessons } from '../database/wmUtils';
-import { API_BASE_URL } from './apiConfig';
-import { getOfflineCourses } from '../database/wmUtils';
+import { getUnsyncedUserProgress, markUserProgressAsSynced } from '../database/wmUtils';
+import { createClient } from '@supabase/supabase-js';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '../config/supabaseClient';
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 export async function syncUserProgressToBackend(userId) {
   const unsynced = await getUnsyncedUserProgress();
   if (!unsynced.length) return;
+
+  // Prepare payload for Supabase
   const payload = unsynced.map(p => ({
     id: p.id,
-    user_id: p.userId,
-    lesson_id: p.lessonId,
+    user_id: p.user_id,
+    lesson_id: p.lesson_id,
     status: p.status,
-    score: p.score,
-    updated_at: p.updatedAt,
+    updated_at: p.updated_at,
   }));
-  const res = await fetch(`${API_BASE_URL}/userprogress/sync`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ user_id: userId, progress: payload }),
-  });
-  if (res.ok) {
+
+  // Upsert to Supabase
+  const { error } = await supabase
+    .from('progress')
+    .upsert(payload, { onConflict: ['id'] }); // Adjust onConflict as per your schema
+
+  if (!error) {
     await markUserProgressAsSynced(unsynced.map(p => p.id));
+  } else {
+    // Optionally handle error (e.g., log or retry)
+    console.error('Supabase sync error:', error);
   }
 }
 

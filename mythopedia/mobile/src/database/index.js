@@ -1,18 +1,9 @@
-import { Database } from '@nozbe/watermelondb';
-import SQLiteAdapter from '@nozbe/watermelondb/adapters/sqlite';
-import schema from './schema';
-import { Course, Lesson, UserProgress } from './models';
+import * as SQLite from 'expo-sqlite';
+import { initializeDatabase } from './schema';
 
-const adapter = new SQLiteAdapter({
-  schema,
-  dbName: 'mythopedia',
-  jsi: false, // Expo does not support JSI
-});
+// Open (or create) the database
+const db = SQLite.openDatabase('mythopedia.db');
 
-const database = new Database({
-  adapter,
-  modelClasses: [Course, Lesson, UserProgress],
-  actionsEnabled: true,
-});
+initializeDatabase();
 
-export default database; 
+export default db; 

@@ -1,41 +1,19 @@
-import * as Analytics from 'expo-firebase-analytics';
+// Analytics service stub. Previously used expo-firebase-analytics, now removed.
+// You can implement analytics with Amplitude, Firebase JS SDK, or another solution here.
 
-export async function logLogin(method) {
-  await Analytics.logEvent('login', { method });
+export async function logEvent(eventName, params) {
+  // Example: Replace with your analytics provider
+  // e.g., Amplitude.logEvent(eventName, params);
+  // For now, just log to console
+  console.log('Analytics event:', eventName, params);
 }
 
-export async function logCourseView(courseId, courseName) {
-  await Analytics.logEvent('course_view', { courseId, courseName });
-}
-
-export async function logLessonView(lessonId, lessonTitle) {
-  await Analytics.logEvent('lesson_view', { lessonId, lessonTitle });
-}
-
-export async function logLessonComplete(lessonId, score) {
-  await Analytics.logEvent('lesson_complete', { lessonId, score });
-}
-
-export async function logXPChange(amount, reason) {
-  await Analytics.logEvent('xp_change', { amount, reason });
-}
-
-export async function logAchievementUnlock(achievementId, name) {
-  await Analytics.logEvent('achievement_unlock', { achievementId, name });
+export async function logLessonView(lessonId) {
+  // Example: Replace with your analytics provider
+  console.log('Lesson viewed:', lessonId);
 }
 
 export async function logDownloadForOffline(courseId) {
-  await Analytics.logEvent('download_for_offline', { courseId });
-}
-
-export async function logFeedbackSubmit(type) {
-  await Analytics.logEvent('feedback_submit', { type });
-}
-
-export async function logShare(action, id, entityType) {
-  await Analytics.logEvent('share', { action, id, entityType });
-}
-
-export async function logDeepLinkOpen(entityType, id) {
-  await Analytics.logEvent('deep_link_open', { entityType, id });
+  // Example: Replace with your analytics provider
+  console.log('Course downloaded for offline:', courseId);
 } 

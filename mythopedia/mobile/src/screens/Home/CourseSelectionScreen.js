@@ -4,7 +4,6 @@ import CourseCard from '../../components/CourseCard';
 import { fetchCourses } from '../../services/courseService';
 import { useDispatch, useSelector } from 'react-redux';
 import { setDownloadedCourses } from '../../store/offlineSlice';
-import { saveCourse, saveLessons, getOfflineCourses } from '../../database/wmUtils';
 import { fetchLessons } from '../../services/lessonService';
 import NetInfo from '@react-native-community/netinfo';
 import { logCourseView, logDownloadForOffline, logShare } from '../../services/analyticsService';
@@ -14,6 +13,7 @@ import XPProgressBar from '../../components/XPProgressBar';
 import * as Linking from 'expo-linking';
 import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
+import { saveCourse, saveLessons, getOfflineCourses } from '../../database/wmUtils';
 
 export default function CourseSelectionScreen({ navigation }) {
   const [courses, setCourses] = useState([]);
