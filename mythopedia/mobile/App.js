@@ -34,21 +34,32 @@ const linking = {
   },
 };
 
-function ErrorBoundary({ children }) {
-  return (
-    <Sentry.ErrorBoundary
-      fallback={({ error, resetError }) => (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 }}>
-          <Text style={{ fontSize: 18, color: 'red', marginBottom: 12 }}>Something went wrong.</Text>
-          <Text style={{ marginBottom: 16 }}>{error.toString()}</Text>
-          <Button title="Try Again" onPress={resetError} />
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.log('Error caught:', error);
+    console.log('Error info:', errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text>Something went wrong!</Text>
+          <Text>{this.state.error?.toString()}</Text>
         </View>
-      )}
-      showDialog
-    >
-      {children}
-    </Sentry.ErrorBoundary>
-  );
+      );
+    }
+    return this.props.children;
+  }
 }
 
 function AppContent() {
@@ -83,7 +94,7 @@ function AppContent() {
     } else {
       Sentry.setUser(null);
     }
-    Sentry.setRelease(Constants.manifest.version);
+    Sentry.setRelease(Constants.expoConfig?.version || '1.0.0');
   }, [user]);
 
   return (
