@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { View, Text, Button, StyleSheet, TouchableOpacity } from 'react-native';
 import { useSelector } from 'react-redux';
 import { useNotification } from '../../src/context/NotificationContext';
@@ -12,13 +12,16 @@ export default function LessonListScreen() {
   });
   const { showNotification } = useNotification();
 
+  const memoizedLessons = useMemo(() => lessons, [lessons]);
+  const handleShowNotification = useCallback(() => showNotification('Lessons loaded!'), [showNotification]);
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Lessons</Text>
-      {lessons.length === 0 ? (
+      {memoizedLessons.length === 0 ? (
         <Text>No lessons available.</Text>
       ) : (
-        lessons.map((lesson: any, idx: number) => (
+        memoizedLessons.map((lesson: any, idx: number) => (
           <TouchableOpacity
             key={idx}
             style={styles.lessonButton}
@@ -28,7 +31,7 @@ export default function LessonListScreen() {
           </TouchableOpacity>
         ))
       )}
-      <Button title="Show Notification" onPress={() => showNotification('Lessons loaded!')} />
+      <Button title="Show Notification" onPress={handleShowNotification} />
     </View>
   );
 }

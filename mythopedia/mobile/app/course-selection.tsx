@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { View, Text, Button, StyleSheet, TouchableOpacity } from 'react-native';
 import { useSelector } from 'react-redux';
 import { useNotification } from '../src/context/NotificationContext';
@@ -8,13 +8,16 @@ export default function CourseSelectionScreen() {
   const courses = useSelector((state: any) => state.courses.list || []);
   const { showNotification } = useNotification();
 
+  const memoizedCourses = useMemo(() => courses, [courses]);
+  const handleShowNotification = useCallback(() => showNotification('Courses loaded!'), [showNotification]);
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Course Selection</Text>
-      {courses.length === 0 ? (
+      {memoizedCourses.length === 0 ? (
         <Text>No courses available.</Text>
       ) : (
-        courses.map((course: any, idx: number) => (
+        memoizedCourses.map((course: any, idx: number) => (
           <TouchableOpacity
             key={idx}
             style={styles.courseButton}
@@ -24,7 +27,7 @@ export default function CourseSelectionScreen() {
           </TouchableOpacity>
         ))
       )}
-      <Button title="Show Notification" onPress={() => showNotification('Courses loaded!')} />
+      <Button title="Show Notification" onPress={handleShowNotification} />
     </View>
   );
 }
