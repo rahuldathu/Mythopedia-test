@@ -40,7 +40,8 @@
           "organization": "mythopedia",
           "project": "mythopedia"
         }
-      ]
+      ],
+      "expo-sqlite"
     ],
     "extra": {
       "SUPABASE_URL": "https://zeexhpwbpjakvztvccsx.supabase.co",
