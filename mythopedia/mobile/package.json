@@ -1,7 +1,6 @@
 {
   "name": "mobile",
   "version": "1.0.0",
-  "main": "app/index.tsx",
   "private": true,
   "scripts": {
     "start": "expo start",
