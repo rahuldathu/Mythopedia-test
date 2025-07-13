@@ -9,15 +9,24 @@ export default function MatchLessonScreen() {
   const dispatch = useDispatch();
   const { showNotification } = useNotification();
 
+  if (!lesson) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Match Lesson</Text>
+        <Text>No match loaded.</Text>
+      </View>
+    );
+  }
+
   const handleComplete = () => {
-    dispatch(setXP(lesson?.xp || 10));
+    dispatch(setXP(lesson.xp || 10));
     showNotification('Match completed!');
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Match Lesson</Text>
-      <Text>{lesson ? lesson.content : 'No match loaded.'}</Text>
+      <Text>{lesson.content ?? 'No content available.'}</Text>
       <Button title="Complete Match" onPress={handleComplete} />
     </View>
   );
@@ -36,4 +45,4 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 24,
   },
-}); 
+});

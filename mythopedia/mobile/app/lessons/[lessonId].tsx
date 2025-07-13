@@ -29,7 +29,7 @@ export default function LessonScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{lesson.title}</Text>
-      <Text>{lesson.content}</Text>
+      <Text>{lesson.content ?? 'No content available.'}</Text>
       <Text>Status: {progress ? progress.status : 'Not started'}</Text>
       <Button title="Mark as Complete" onPress={handleComplete} />
     </View>
@@ -49,4 +49,4 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 24,
   },
-}); 
+});

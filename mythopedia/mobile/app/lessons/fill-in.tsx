@@ -9,15 +9,24 @@ export default function FillInLessonScreen() {
   const dispatch = useDispatch();
   const { showNotification } = useNotification();
 
+  if (!lesson) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Fill In Lesson</Text>
+        <Text>No fill-in loaded.</Text>
+      </View>
+    );
+  }
+
   const handleComplete = () => {
-    dispatch(setXP(lesson?.xp || 10));
+    dispatch(setXP(lesson.xp || 10));
     showNotification('Fill-in completed!');
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Fill In Lesson</Text>
-      <Text>{lesson ? lesson.content : 'No fill-in loaded.'}</Text>
+      <Text>{lesson.content ?? 'No content available.'}</Text>
       <Button title="Complete Fill-In" onPress={handleComplete} />
     </View>
   );
@@ -36,4 +45,4 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 24,
   },
-}); 
+});

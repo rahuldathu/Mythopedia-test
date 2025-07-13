@@ -1,9 +1,18 @@
+import { Platform } from 'react-native';
 import * as SQLite from 'expo-sqlite';
 
-const db = SQLite.openDatabase('mythopedia.db');
+let db = null;
+
+if (Platform.OS !== 'web') {
+  db = SQLite.openDatabase('mythopedia.db');
+} else {
+  console.warn('SQLite is not supported on Web.');
+}
 
 // Initialize tables
 export function initDB() {
+  if (!db) return;
+
   db.transaction(tx => {
     tx.executeSql(
       'CREATE TABLE IF NOT EXISTS lessons (id TEXT PRIMARY KEY, course_id TEXT, type TEXT, content TEXT);'
@@ -15,6 +24,8 @@ export function initDB() {
 }
 
 export function saveLesson(lesson) {
+  if (!db) return;
+
   db.transaction(tx => {
     tx.executeSql(
       'INSERT OR REPLACE INTO lessons (id, course_id, type, content) VALUES (?, ?, ?, ?);',
@@ -24,6 +35,8 @@ export function saveLesson(lesson) {
 }
 
 export function getLesson(id, callback) {
+  if (!db) return callback(null);
+
   db.transaction(tx => {
     tx.executeSql(
       'SELECT * FROM lessons WHERE id = ?;',
@@ -34,6 +47,8 @@ export function getLesson(id, callback) {
 }
 
 export function getAllOfflineLessons(callback) {
+  if (!db) return callback([]);
+
   db.transaction(tx => {
     tx.executeSql(
       'SELECT * FROM lessons;',
@@ -44,6 +59,8 @@ export function getAllOfflineLessons(callback) {
 }
 
 export function saveProgress(progress) {
+  if (!db) return;
+
   db.transaction(tx => {
     tx.executeSql(
       'INSERT INTO progress (user_id, course_id, lesson_id, status, xp_earned, completed_at) VALUES (?, ?, ?, ?, ?, ?);',
@@ -53,6 +70,8 @@ export function saveProgress(progress) {
 }
 
 export function getProgress(user_id, callback) {
+  if (!db) return callback([]);
+
   db.transaction(tx => {
     tx.executeSql(
       'SELECT * FROM progress WHERE user_id = ?;',
@@ -63,8 +82,10 @@ export function getProgress(user_id, callback) {
 }
 
 export function clearOfflineData() {
+  if (!db) return;
+
   db.transaction(tx => {
     tx.executeSql('DELETE FROM lessons;');
     tx.executeSql('DELETE FROM progress;');
   });
-} 
+}

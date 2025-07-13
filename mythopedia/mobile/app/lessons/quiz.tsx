@@ -9,15 +9,24 @@ export default function QuizLessonScreen() {
   const dispatch = useDispatch();
   const { showNotification } = useNotification();
 
+  if (!lesson) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Quiz Lesson</Text>
+        <Text>No quiz loaded.</Text>
+      </View>
+    );
+  }
+
   const handleComplete = () => {
-    dispatch(setXP(lesson?.xp || 10));
+    dispatch(setXP(lesson.xp || 10));
     showNotification('Quiz completed!');
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Quiz Lesson</Text>
-      <Text>{lesson ? lesson.content : 'No quiz loaded.'}</Text>
+      <Text>{lesson.content ?? 'No content available.'}</Text>
       <Button title="Complete Quiz" onPress={handleComplete} />
     </View>
   );
@@ -36,4 +45,4 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 24,
   },
-}); 
+});
