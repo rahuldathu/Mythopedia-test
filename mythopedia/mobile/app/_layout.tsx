@@ -6,15 +6,21 @@ import store from '../src/store';
 import useOfflineSync from '../src/hooks/useOfflineSync';
 
 export default function RootLayout() {
-  useOfflineSync();
-
   return (
     <ReduxProvider store={store}>
       <AuthProvider>
-        <NotificationProvider>
-          <Slot />
-        </NotificationProvider>
+        <RootLayoutNav />
       </AuthProvider>
     </ReduxProvider>
+  );
+}
+
+function RootLayoutNav() {
+  useOfflineSync();
+
+  return (
+    <NotificationProvider>
+      <Slot />
+    </NotificationProvider>
   );
 }
