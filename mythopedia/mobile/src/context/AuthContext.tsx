@@ -54,7 +54,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email, password) => {
     const { data, error } = await supabase.auth.signUp({ email, password });
-    if (error) throw error;
+    if (error) {
+      console.error('Sign up error:', error);
+      throw error;
+    }
     setUser(data.user);
     await SecureStore.setItemAsync('sb_token', data.session.access_token);
     await logLogin('register');
