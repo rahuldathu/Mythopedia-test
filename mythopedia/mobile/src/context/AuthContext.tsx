@@ -1,27 +1,39 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { supabase } from '../services/supabaseClient';
 import { logLogin } from '../services/analyticsService';
 import { useDispatch } from 'react-redux';
 import { setXP } from '../store/progressSlice';
+import { User } from '@supabase/supabase-js';
 
-const AuthContext = createContext();
+// Define the shape of the context value
+interface AuthContextType {
+  user: User | null;
+  loading: boolean;
+  login: (email, password) => Promise<any>;
+  signUp: (email, password) => Promise<any>;
+  signOut: () => Promise<void>;
+  resetPassword: (email) => Promise<void>;
+}
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    // Check for existing session on mount
-    const session = supabase.auth.getSession();
-    session.then(({ data }) => {
-      setUser(data?.session?.user || null);
+    const getSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      setUser(data?.session?.user ?? null);
       setLoading(false);
-    });
-    // Listen for auth changes
+    };
+
+    getSession();
+
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user || null);
+      setUser(session?.user ?? null);
       if (session) {
         SecureStore.setItemAsync('sb_token', session.access_token);
       } else {
@@ -31,7 +43,7 @@ export function AuthProvider({ children }) {
     return () => listener?.subscription.unsubscribe();
   }, []);
 
-  const signIn = async (email, password) => {
+  const login = async (email, password) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
     setUser(data.user);
@@ -62,12 +74,16 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut, resetPassword }}>
+    <AuthContext.Provider value={{ user, loading, login, signUp, signOut, resetPassword }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
 export function useAuth() {
-  return useContext(AuthContext);
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 } 

@@ -1,17 +1,17 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
-import { AuthContext } from '../src/context/AuthContext';
+import { useAuth } from '../src/context/AuthContext';
 
 export default function RegisterScreen() {
-  const { register } = useContext(AuthContext);
+  const { signUp } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   const handleRegister = async () => {
     try {
-      await register(email, password);
+      await signUp(email, password);
       router.replace('/profile');
     } catch (e) {
       setError('Registration failed');
