@@ -1,6 +1,6 @@
 {
   "expo": {
-    "jsEngine": "jsc",
+    "jsEngine": "hermes",
     "name": "Mythopedia",
     "slug": "mythopedia",
     "version": "1.0.0",
