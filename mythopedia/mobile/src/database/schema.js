@@ -32,7 +32,18 @@ export function initializeDatabase(db) {
         status TEXT,
         updated_at TEXT,
         synced INTEGER DEFAULT 0,
-        FOREIGN KEY(lesson_id) REFERENCES lessons(id)
+        FOREIGN KEY(lesson_id) REFERENCES lessons(id),
+        FOREIGN KEY(user_id) REFERENCES users(id)
+      );
+    `);
+
+    tx.executeSql(`
+      CREATE TABLE IF NOT EXISTS users (
+        id TEXT PRIMARY KEY NOT NULL,
+        email TEXT,
+        username TEXT,
+        avatar_url TEXT,
+        updated_at TEXT
       );
     `);
 
