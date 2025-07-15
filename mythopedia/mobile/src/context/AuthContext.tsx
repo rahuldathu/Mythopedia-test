@@ -62,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await SecureStore.setItemAsync('sb_token', data.session.access_token);
     await logLogin('register');
     dispatch(setXP(25));
-    return data;
+    return data.user;
   };
 
   const signOut = async () => {
