@@ -11,10 +11,7 @@ export default function RegisterScreen() {
 
   const handleRegister = async () => {
     try {
-      const user = await signUp(email, password);
-      if (user) {
-        router.replace('/profile');
-      }
+      await signUp(email, password);
     } catch (e) {
       setError('Registration failed');
     }

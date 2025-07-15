@@ -5,6 +5,7 @@ import { logLogin } from '../services/analyticsService';
 import { useDispatch } from 'react-redux';
 import { setXP } from '../store/progressSlice';
 import { User } from '@supabase/supabase-js';
+import { router } from 'expo-router';
 
 // Define the shape of the context value
 interface AuthContextType {
@@ -58,10 +59,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error('Sign up error:', error);
       throw error;
     }
-    setUser(data.user);
-    await SecureStore.setItemAsync('sb_token', data.session.access_token);
-    await logLogin('register');
-    dispatch(setXP(25));
+    if (data.user) {
+      router.replace('/confirm-email');
+    }
     return data.user;
   };
 
